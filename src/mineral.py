@@ -33,6 +33,11 @@ def read_embedding(path, existing_emb=None, sep=None):
 
 
 def normalize(network):
+    """
+    Normalize the weights of edges of a graph
+    :param network: The graph
+    :return:
+    """
     logging.info('Normalizing edge weights')
     for src in network:
         norm = 0
@@ -44,7 +49,15 @@ def normalize(network):
 
 
 def add_edge(g, src, dst, w, directed=True):
-
+    """
+    Adds a directed/undirected edge between two nodes of a given graph
+    :param g: the graph
+    :param src: first node
+    :param dst: second node
+    :param w: The weight of the edge
+    :param directed: Whether the edge is directed or not
+    :return:
+    """
     if src not in g:
         g[src] = {dst: w}
     else:
@@ -55,7 +68,7 @@ def add_edge(g, src, dst, w, directed=True):
 
 def read_network(path, weighted=True, directed=False, sep=None):
     """
-    Reads ground truth network from a file
+    Reads a network from a file path
 
     :param path:
     :param sep:
@@ -77,6 +90,14 @@ def read_network(path, weighted=True, directed=False, sep=None):
 
 
 def read_cascades(cas_file, min_threshold, max_threshold):
+    """
+    Reading cascades from a file path
+
+    :param cas_file:
+    :param min_threshold:
+    :param max_threshold:
+    :return:
+    """
     logging.info('Reading existing cascades from {} ...'.format(cas_file))
     cascades = []
     with open(cas_file) as f:
@@ -92,6 +113,8 @@ def read_cascades(cas_file, min_threshold, max_threshold):
 
 def simulate_diffusion(network, root, r, h):
     """
+    Simulates an information diffusion processes in-order to sample cascades
+
     :param network: 
     :param root: A root from which the diffusion process starts from
     :param r: parameter for the number of times a diffusion is to be simulated from the root
@@ -134,7 +157,7 @@ def simulate_diffusion(network, root, r, h):
 
 def mineral_cascades(network, r, h):
     """
-    Generate cascades using a number of simulation of truncated diffusion processes from
+    Samples cascades using a number of simulation of truncated diffusion processes from
     each node
     
     :param network: 
@@ -187,6 +210,10 @@ def parse_args():
     return parser.parse_args()
 
 
+def save_embedding(path, model):
+    model.save_word2vec_format(path)
+
+
 def main():
     args = parse_args()
     display_args(args)
@@ -203,7 +230,7 @@ def main():
         else:
             logging.info('Without cascades')
             model = embed(cascades, d=args.dim, window=args.window, epoch=args.iter)
-        model.save_word2vec_format(args.emb_file)
+        save_embedding(args.emb_path, model)
     else:
         logging.error('The length of the cascades is zero, nothing to train on')
 
