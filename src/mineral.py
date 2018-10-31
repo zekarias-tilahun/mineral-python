@@ -217,13 +217,13 @@ def save_embedding(path, model):
 def main():
     args = parse_args()
     display_args(args)
-    network = helper.read_network(args.net_file, directed=args.directed)
+    network = read_network(args.net_file, directed=args.directed)
     cascades = mineral_cascades(network, r=args.r, h=args.h)
     cascades = [map(str, cascade) for cascade in cascades]
     if len(cascades) > 0:
         if args.cas_file != '':
             logging.info('With cascades')
-            existing_cascades = helper.read_cascades(args.cas_file, args.min_threshold, args.max_threshold)
+            existing_cascades = read_cascades(args.cas_file, args.min_threshold, args.max_threshold)
             existing_cascades = [map(str, cascade) for cascade in existing_cascades]
             cascades += existing_cascades
             model = embed(cascades, d=args.dim, window=args.window, epoch=args.iter)
