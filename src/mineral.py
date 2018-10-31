@@ -9,6 +9,88 @@ from gensim.models import Word2Vec
 logging.basicConfig(level=logging.ERROR)
 
 
+def read_embedding(path, existing_emb=None, sep=None):
+    """
+    Read nodes embedding (representation) from a file
+    :param path:
+    :param existing_emb
+    :param sep:
+    :return:
+    """
+    logging.info('{}:Reading embedding from {}'.format(dt.datetime.now(), path))
+    nodes_embedding = {}
+    with open(path) as f:
+        for line in f:
+            node_embedding = line.strip().split() if sep is None else line.strip().split(sep)
+            if len(node_embedding) > 2:
+                node = int(node_embedding[0])
+                if existing_emb is not None and node in existing_emb:
+                    embedding = np.array([float(num) for num in node_embedding[1:]])
+                    nodes_embedding[node] = embedding
+                elif existing_emb is None:
+                    embedding = np.array([float(num) for num in node_embedding[1:]])
+                    nodes_embedding[node] = embedding
+    return nodes_embedding
+
+
+def normalize(network):
+    logging.info('Normalizing edge weights')
+    for src in network:
+        norm = 0
+        for dst in network[src]:
+            norm += network[src][dst] ** 2
+
+        for dst in network[src]:
+            network[src][dst] /= np.sqrt(norm)
+
+
+def add_edge(g, src, dst, w, directed=True):
+
+    if src not in g:
+        g[src] = {dst: w}
+    else:
+        g[src][dst] = w
+    if not directed:
+        add_edge(g, dst, src, True)
+
+
+def read_network(path, weighted=True, directed=False, sep=None):
+    """
+    Reads ground truth network from a file
+
+    :param path:
+    :param sep:
+    :param weighted
+    :param directed
+    :return:
+    """
+    logging.info('{}:Reading network from {}'.format(dt.datetime.now(), path))
+    network = {}
+    with open(path) as f:
+        for line in f:
+            edge = line.strip().split() if sep is None else line.strip().split(sep)
+            src, dst = int(edge[0]), int(edge[1])
+            weight = float(edge[2]) if weighted else 1.0
+            add_edge(network, src, dst, weight, directed)
+
+    normalize(network)
+    return network
+
+
+def read_cascades(cas_file, min_threshold, max_threshold):
+    logging.info('Reading existing cascades from {} ...'.format(cas_file))
+    cascades = []
+    with open(cas_file) as f:
+        for line in f:
+            cascade = []
+            cas = line.strip().split()
+            if min_threshold < len(cas) < max_threshold:
+                for node in cas:
+                    cascade.append(int(node))
+                cascades.append(cas)
+    return cascades
+
+
 def simulate_diffusion(network, root, r, h):
     """
     :param network: 
@@ -74,7 +156,7 @@ def mineral_cascades(network, r, h):
     return cascades
 
 
-def learn_embedding(walks, d, window, epoch, workers=8):
+def embed(walks, d, window, epoch, workers=8):
     return Word2Vec(walks, size=d, window=window, min_count=0,
                     iter=epoch, sg=1, workers=workers)
 
@@ -87,18 +169,18 @@ def display_args(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Runs diffusion simulator")
-    parser.add_argument('--net-file', '-n', default='', help='Path to network file')
-    parser.add_argument('--cas-file', '-c', default='', help='Path to existing cascade file')
-    parser.add_argument('--emb-file', '-e', default='', help='Path to the embedding output file')
+    parser.add_argument('--net-file', default='', help='Path to network file')
+    parser.add_argument('--cas-file', default='', help='Path to existing cascade file')
+    parser.add_argument('--emb-file', default='', help='Path to the embedding output file')
     parser.add_argument('--directed', dest='directed', action='store_true')
     parser.add_argument('--undirected', dest='directed', action='store_false')
     parser.set_defaults(directed=True)
     parser.add_argument('--weighted', dest='weighted', action='store_true')
     parser.add_argument('--unweighted', dest='weighted', action='store_false')
     parser.set_defaults(weighted=True)
-    parser.add_argument('--min-threshold', '-mn', type=int, default=10, help='Minimum cascade length to consider')
-    parser.add_argument('--max-threshold', '-mx', type=int, default=500, help='Maximum cascade length to consider')
-    parser.add_argument('--dim', '-d', type=int, default=100, help='Size of the representation')
+    parser.add_argument('--min-threshold', type=int, default=10, help='Minimum cascade length to consider')
+    parser.add_argument('--max-threshold', type=int, default=500, help='Maximum cascade length to consider')
+    parser.add_argument('--dim', type=int, default=100, help='Size of the representation')
     parser.add_argument('--window', type=int, default=10, help='Window size')
     parser.add_argument('--iter', type=int, default=20, help='Number of epochs')
     parser.add_argument('--r', type=int, default=10, help='Number of diffusion processes to simulate from a node')
@@ -118,10 +200,10 @@ def main():
             existing_cascades = helper.read_cascades(args.cas_file, args.min_threshold, args.max_threshold)
             existing_cascades = [map(str, cascade) for cascade in existing_cascades]
             cascades += existing_cascades
-            model = learn_embedding(cascades, d=args.dim, window=args.window, epoch=args.iter)
+            model = embed(cascades, d=args.dim, window=args.window, epoch=args.iter)
         else:
             logging.info('Without cascades')
-            model = learn_embedding(cascades, d=args.dim, window=args.window, epoch=args.iter)
+            model = embed(cascades, d=args.dim, window=args.window, epoch=args.iter)
         model.save_word2vec_format(args.emb_file)
     else:
         logging.error('The length of the cascades is zero, nothing to train on')
