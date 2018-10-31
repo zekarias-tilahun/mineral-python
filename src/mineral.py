@@ -3,75 +3,10 @@ import logging
 import argparse
 import sys
 import numpy as np
-import datetime as dt
 
 from gensim.models import Word2Vec
 
 logging.basicConfig(level=logging.ERROR)
-
-
-def alias_setup(dist):
-    """
-    Set up the alias and probability tables of Vose's Alias sampling method.
-
-    :param dist:
-    :return: (alias table, probability table, node look up table)
-    """
-
-    logging.debug('{} Initializing the alias and probability tables'.format(dt.datetime.now()))
-    k = len(dist)
-    probability_table = np.zeros(k)
-    alias_table = np.zeros(k, dtype=np.int)
-    # Sort the data into the outcomes with probabilities
-    #  that are larger and smaller than 1/K.
-    smaller = []
-    larger = []
-    index = 0
-    index_to_node = {}
-    for node, prob in dist.items():
-        index_to_node[index] = node
-        probability_table[index] = k * prob
-        if probability_table[index] < 1.0:
-            smaller.append(index)
-        else:
-            larger.append(index)
-        index += 1
-
-    # Loop though and create little binary mixtures that
-    # appropriately allocate the larger outcomes over the
-    #  overall uniform mixture.
-    while len(smaller) > 0 and len(larger) > 0:
-        small = smaller.pop()
-        large = larger.pop()
-
-        alias_table[small] = large
-        probability_table[large] -= 1.0 - probability_table[small]
-
-        if probability_table[large] < 1.0:
-            smaller.append(large)
-        else:
-            larger.append(large)
-
-    return alias_table, probability_table, index_to_node
-
-
-def alias_draw(alias_table, probability_table):
-    """
-    Draw samples from either the alias or probability table
-
-    :param alias_table:
-    :param probability_table:
-    :return:
-    """
-    K = len(alias_table)
-    # Draw from the overall uniform mixture.
-    index = int(np.floor(np.random.uniform() * K))
-    # Draw from the binary mixture, either keeping the
-    # small one, or choosing the associated larger one.
-    if np.random.uniform() < probability_table[index]:
-        return index
-    else:
-        return alias_table[index]
 
 
 def simulate_diffusion(network, root, r, h):
@@ -114,32 +49,6 @@ def simulate_diffusion(network, root, r, h):
             t += 1
         cascades.append([node for current_infection in cascade for node in current_infection])
     return cascades
-
-
-def mineral_setup(network):
-    """
-    Builds node configuration tables by maintaining a three table structures to facilitate
-    constant time neighbor sampling. Thus for a given node u, the node configuration
-    will look like
-          node_config[u] = (alias_table, probability_table, index_to_node)
-          alias_table and probability_table are data structures used for the sampling
-          according to Vose's alias sampling method
-
-          index_to_node is a look up table and associates an index (automatically generated)
-          to a unique node.
-
-    :param network:
-    :return:
-    """
-    logging.info('Setting up the network to facilitate constant time edge sampling')
-    nodes_config = {}
-    for src in network:
-        norm_const = np.sum(network[src].values())
-        for dst in network[src]:
-            network[src][dst] /= norm_const
-
-        nodes_config[src] = alias_setup(network[src])
-    return nodes_config
 
 
 def mineral_cascades(network, r, h):
