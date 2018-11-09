@@ -2,10 +2,11 @@ import logging
 import argparse
 import sys
 import numpy as np
+import datetime as dt
 
 from gensim.models import Word2Vec
 
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO)
 
 
 def read_embedding(path, existing_emb=None, sep=None):
@@ -169,10 +170,12 @@ def mineral_cascades(network, r, h):
     nodes = network.keys()
     cascades = []
     progress = 0
+    display_step = int(len(nodes) * .01)
     for root in nodes:
         progress += 1
-        sys.stdout.write('\r{}/{} nodes have been processed'.format(progress, len(nodes)))
-        sys.stdout.flush()
+        if progress % display_step == 0:
+            sys.stdout.write('\r{}/{} nodes have been processed'.format(progress, len(nodes)))
+            sys.stdout.flush()
         cascades += simulate_diffusion(network, root, r, h)
 
     return cascades
@@ -191,22 +194,22 @@ def display_args(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Runs diffusion simulator")
-    parser.add_argument('--net-file', default='', help='Path to network file')
-    parser.add_argument('--cas-file', default='', help='Path to existing cascade file')
-    parser.add_argument('--emb-file', default='', help='Path to the embedding output file')
+    parser.add_argument('--net-file', default='./data/network.txt', help='Path to network file')
+    parser.add_argument('--cas-file', default='./data/cascades.txt', help='Path to existing cascade file')
+    parser.add_argument('--emb-file', default='./data/graph.emb', help='Path to the embedding output file')
     parser.add_argument('--directed', dest='directed', action='store_true')
     parser.add_argument('--undirected', dest='directed', action='store_false')
-    parser.set_defaults(directed=True)
+    parser.set_defaults(directed=False)
     parser.add_argument('--weighted', dest='weighted', action='store_true')
     parser.add_argument('--unweighted', dest='weighted', action='store_false')
-    parser.set_defaults(weighted=True)
+    parser.set_defaults(weighted=False)
     parser.add_argument('--min-threshold', type=int, default=10, help='Minimum cascade length to consider')
     parser.add_argument('--max-threshold', type=int, default=500, help='Maximum cascade length to consider')
-    parser.add_argument('--dim', type=int, default=100, help='Size of the representation')
+    parser.add_argument('--dim', type=int, default=128, help='Size of the representation')
     parser.add_argument('--window', type=int, default=10, help='Window size')
     parser.add_argument('--iter', type=int, default=20, help='Number of epochs')
     parser.add_argument('--r', type=int, default=10, help='Number of diffusion processes to simulate from a node')
-    parser.add_argument('--h', type=int, default=60, help='Maximum number of nodes to infect in a single simulation')
+    parser.add_argument('--h', type=int, default=80, help='Maximum number of nodes to infect in a single simulation')
     return parser.parse_args()
 
 
@@ -217,7 +220,7 @@ def save_embedding(path, model):
 def main():
     args = parse_args()
     display_args(args)
-    network = read_network(args.net_file, directed=args.directed)
+    network = read_network(args.net_file, directed=args.directed, weighted=args.weighted)
     cascades = mineral_cascades(network, r=args.r, h=args.h)
     cascades = [map(str, cascade) for cascade in cascades]
     if len(cascades) > 0:
