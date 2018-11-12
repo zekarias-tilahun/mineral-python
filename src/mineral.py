@@ -182,8 +182,8 @@ def mineral_cascades(network, r, h):
 
 
 def embed(walks, d, window, epoch, workers=8):
-    return Word2Vec(walks, size=d, window=window, min_count=0,
-                    iter=epoch, sg=1, workers=workers)
+    model = Word2Vec(walks, size=d, window=window, min_count=0, iter=epoch, sg=1, workers=workers)
+    return model
 
 
 def display_args(args):
@@ -214,7 +214,7 @@ def parse_args():
 
 
 def save_embedding(path, model):
-    model.save_word2vec_format(path)
+    model.wv.save_word2vec_format(path)
 
 
 def main():
@@ -222,7 +222,7 @@ def main():
     display_args(args)
     network = read_network(args.net_file, directed=args.directed, weighted=args.weighted)
     cascades = mineral_cascades(network, r=args.r, h=args.h)
-    cascades = [map(str, cascade) for cascade in cascades]
+    cascades = [list(map(str, cascade)) for cascade in cascades]
     if len(cascades) > 0:
         if args.cas_file != '':
             logging.info('With cascades')
