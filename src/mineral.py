@@ -217,6 +217,10 @@ def save_embedding(path, model):
     model.wv.save_word2vec_format(path)
 
 
+def save_cascades(path, cascades):
+    pass
+
+
 def main():
     args = parse_args()
     display_args(args)
