@@ -196,6 +196,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Runs diffusion simulator")
     parser.add_argument('--net-file', default='./data/network.txt', help='Path to network file')
     parser.add_argument('--cas-file', default='./data/cascades.txt', help='Path to existing cascade file')
+    parser.add_argument('--sim-file', default='./data/simulated_cascades.txt', help='Path to simulated cascade file')
     parser.add_argument('--emb-file', default='./data/graph.emb', help='Path to the embedding output file')
     parser.add_argument('--directed', dest='directed', action='store_true')
     parser.add_argument('--undirected', dest='directed', action='store_false')
@@ -218,7 +219,9 @@ def save_embedding(path, model):
 
 
 def save_cascades(path, cascades):
-    pass
+    with open(path, 'w') as f:
+        for c in cascades:
+            f.write('{}\n'.format(' '.join(str(n) for n in c)))
 
 
 def main():
@@ -226,6 +229,9 @@ def main():
     display_args(args)
     network = read_network(args.net_file, directed=args.directed, weighted=args.weighted)
     cascades = mineral_cascades(network, r=args.r, h=args.h)
+    if args.sim_file != '':
+        save_cascades(args.sim_file, cascades)
+
     cascades = [list(map(str, cascade)) for cascade in cascades]
     if len(cascades) > 0:
         if args.cas_file != '':
@@ -237,7 +243,7 @@ def main():
         else:
             logging.info('Without cascades')
             model = embed(cascades, d=args.dim, window=args.window, epoch=args.iter)
-        save_embedding(args.emb_path, model)
+        save_embedding(args.emb_file, model)
     else:
         logging.error('The length of the cascades is zero, nothing to train on')
 
