@@ -14,10 +14,10 @@ $ python src/mineral.py --net-file ../data/network.txt --emb-file ../data/cascad
 `network file`
 
 ```text
->Format
+Format
 source target weight
 
->Example
+Example
 0 1 0.2
 0 2 0.4
 1 2 0.7
