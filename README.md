@@ -85,7 +85,6 @@ Path to a network file. Default is ../data/network.txt
 
 Citing
 ------
-
 If you find Mineral relevant to your research, we kindly ask you to cite the paper:
 
 ```
