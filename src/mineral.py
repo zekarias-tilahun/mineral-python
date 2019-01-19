@@ -145,11 +145,11 @@ def simulate_diffusion_events(network, r, h):
     nodes = list(network.nodes())
     cascades = []
     for i in range(r):
-        print('PROGRESS: {}/{}'.format(i + 1, r))
         np.random.shuffle(nodes)
         for root in nodes:
             cascade = simulate_diffusion(network, root, h)
             cascades.append(cascade)
+        print('PROGRESS: {}/{}'.format(i + 1, r))
 
     return cascades
 
@@ -171,10 +171,10 @@ def parse_args():
     parser.add_argument('--net-format', default='edgelist',
                         help='Graph file format, possible values are (edgelist, adjlist).'
                              'Default is edgelist')
-    parser.add_argument('--att-file', default='../data/attributes.txt', help='Path to attributes file')
+    parser.add_argument('--att-file', default='', help='Path to attributes file')
     parser.add_argument('--att-format', default='adjlist',
                         help='Similar to graph file format. Default is adjlist')
-    parser.add_argument('--cas-file', default='../data/cascades.txt',
+    parser.add_argument('--cas-file', default='',
                         help='Path to observed cascades file')
     parser.add_argument('--sim-file', default='../data/simulated_cascades.txt', help='Path to simulated cascade file')
     parser.add_argument('--emb-file', default='../data/network.emb', help='Path to the embedding output file')
