@@ -1,162 +1,133 @@
-import logging
-import argparse
-import sys
-import numpy as np
-import datetime as dt
-
+from sklearn.preprocessing import normalize
 from gensim.models import Word2Vec
 
-logging.basicConfig(level=logging.INFO)
+from mineral_helper import *
+
+import networkx as nx
+import numpy as np
+
+import argparse
 
 
-def read_embedding(path, existing_emb=None, sep=None):
+def sample_cascade(cascade_graph, root, h, num_nodes):
     """
-    Read nodes embedding (representation) from a file
-    :param path:
-    :param existing_emb
-    :param sep:
-    :return:
+    Uniformly samples a cascade from a cascade graph starting at a given root
+    node. The length of the cascade is bounded by an upper value
+    :param cascade_graph: The cascade graph
+    :param root: The root node to sample a cascade from
+    :param h: The cascade length
+    :param num_nodes: The number of nodes used to control nodes to add to the
+                      sampled cascade
+    :return: list, A cascade [sequence of nodes]
     """
-    logging.info('{}:Reading embedding from {}'.format(dt.datetime.now(), path))
-    nodes_embedding = {}
-    with open(path) as f:
-        for line in f:
-            node_embedding = line.strip().split() if sep is None else line.strip().split(sep)
-            if len(node_embedding) > 2:
-                node = int(node_embedding[0])
-                if existing_emb is not None and node in existing_emb:
-                    embedding = np.array([float(num) for num in node_embedding[1:]])
-                    nodes_embedding[node] = embedding
-                elif existing_emb is None:
-                    embedding = np.array([float(num) for num in node_embedding[1:]])
-                    nodes_embedding[node] = embedding
-    return nodes_embedding
+    cascade = [root]
+    next_nodes = [root]
+    while len(next_nodes) < h:
+        current_node = next_nodes[-1]
+        if current_node in cascade_graph:
+            neighbors = cascade_graph[current_node]
+            next_node = np.random.choice(neighbors)
+            next_nodes.append(next_node)
+            if next_node < num_nodes:
+                cascade.append(next_node)
+        else:
+            break
+    return cascade
 
 
-def normalize(network):
+def sample_cascades(cascade_graph, num_nodes, r, h):
     """
-    Normalize the weights of edges of a graph
-    :param network: The graph
-    :return:
+    Samples cascades from observed cascades modeled as a cascade graph
+
+    :param cascade_graph: The cascade graph
+    :param num_nodes: The number of nodes in the actual graph
+    :param r: The number of cascades to sample from each node
+    :param h: The length of a sampled cascade
+    :return: list of lists: A list containing sampled cascades
     """
-    logging.info('Normalizing edge weights')
-    for src in network:
-        norm = 0
-        for dst in network[src]:
-            norm += network[src][dst] ** 2
-
-        for dst in network[src]:
-            network[src][dst] /= np.sqrt(norm)
-
-
-def add_edge(g, src, dst, w, directed=True):
-    """
-    Adds a directed/undirected edge between two nodes of a given graph
-    :param g: the graph
-    :param src: first node
-    :param dst: second node
-    :param w: The weight of the edge
-    :param directed: Whether the edge is directed or not
-    :return:
-    """
-    if src not in g:
-        g[src] = {dst: w}
-    else:
-        g[src][dst] = w
-    if not directed:
-        add_edge(g, dst, src, True)
-
-
-def read_network(path, weighted=True, directed=False, sep=None):
-    """
-    Reads a network from a file path
-
-    :param path:
-    :param sep:
-    :param weighted
-    :param directed
-    :return:
-    """
-    logging.info('{}:Reading network from {}'.format(dt.datetime.now(), path))
-    network = {}
-    with open(path) as f:
-        for line in f:
-            edge = line.strip().split() if sep is None else line.strip().split(sep)
-            src, dst = int(edge[0]), int(edge[1])
-            weight = float(edge[2]) if weighted else 1.0
-            add_edge(network, src, dst, weight, directed)
-
-    normalize(network)
-    return network
-
-
-def read_cascades(cas_file, min_threshold, max_threshold):
-    """
-    Reading cascades from a file path
-
-    :param cas_file:
-    :param min_threshold:
-    :param max_threshold:
-    :return:
-    """
-    logging.info('Reading existing cascades from {} ...'.format(cas_file))
     cascades = []
-    with open(cas_file) as f:
-        for line in f:
-            cascade = []
-            cas = line.strip().split()
-            if min_threshold < len(cas) < max_threshold:
-                for node in cas:
-                    cascade.append(int(node))
-                cascades.append(cas)
+    nodes = cascade_graph.nodes()
+    for i in range(r):
+        print('PROGRESS: {}/{}'.format(i + 1, r))
+        np.random.shuffle(nodes)
+        for root in nodes:
+            cascade = sample_cascade(
+                cascade_graph, root=root, h=h, num_nodes=num_nodes)
+            cascades.append(cascade)
     return cascades
 
 
-def simulate_diffusion(network, root, r, h):
+def compute_similarity(network, feature_matrix):
+    """
+    Builds a weighted graph, where each edge (u, v, sim) is constructed by
+    computing the Jaccard similarity (sim) of the attributes of nodes u and v.
+    For the sake efficiency, a vectorized implementation is used
+    :param network: The network
+    :param feature_matrix: Attribute information encoded as a feature matrix
+            A row is a node and each column is associated with the attributes.
+            feature_matrix[i, j] = 1 if node i has attribute j otherwise 0.
+    :return:
+    """
+    edges = network.edges()
+    adj_mat = nx.to_scipy_sparse_matrix(network, sorted(network.nodes()))
+    sources, targets = list(zip(*edges))
+
+    '''
+        Computing common attributes. The matrix common_attributes
+        has the same number of rows as the number of edges due to
+        feature_matrix[sources] + feature_matrix[targets].
+        If common_attributes[(i, j), k] = 0, neither i nor j has the 
+        k-th attribute, if common_attributes[(i, j), k] = 1, either of
+        them has the k-th attribute, if common_attributes[(i, j), k] = 2
+        both of them has the k-th attribute.
+    '''
+    common_attributes = feature_matrix[sources] + feature_matrix[targets]
+    num_common_attributes = np.apply_along_axis(
+        lambda arr: arr[arr == 2].size, axis=1, arr=common_attributes)
+
+    # Computing combined attributes
+    num_combined_attributes = np.apply_along_axis(
+        lambda arr: arr[arr > 0].size, axis=1, arr=common_attributes)
+
+    # Jaccard similarity
+    similarities = num_common_attributes / num_combined_attributes
+
+    # Construct a weighted graph based on the similarities
+    adj_mat[sources, targets] = similarities
+    norm_adj_mat = normalize(adj_mat, norm='l1')
+    return nx.from_scipy_sparse_matrix(norm_adj_mat)
+
+
+def simulate_diffusion(network, root, h):
     """
     Simulates an information diffusion processes in-order to sample cascades
 
-    :param network: 
-    :param root: A root from which the diffusion process starts from
-    :param r: parameter for the number of times a diffusion is to be simulated from the root
-    :param h: The maximum number of nodes to be infected after the simulation
-    :return: 
+    :param network: The network
+    :param root: The root node from which cascades will be sampled
+    :param h: The maximum length of a cascade sample
+    :return: list: A cascade (A sequence of nodes)
     """
-    cascades = []
-    for i in range(r):
-        size_limit_reached = False
-        cascade = [[root]]
-        infected = {root}
-        t = 1
-        while not size_limit_reached:
-            currently_infected_nodes = []
-            previously_infected_nodes = cascade[t - 1]
-
-            for node in previously_infected_nodes:
-                if node in network:
-                    for nbr in network[node]:
-                        if nbr not in infected:
-                            weight = network[node][nbr]
-                            r = np.random.random()
-                            if r < weight:
-                                currently_infected_nodes.append(nbr)
-                                infected.add(nbr)
-                                if len(infected) >= h:
-                                    size_limit_reached = True
-                                    break
-
-                if size_limit_reached:
-                    break
-            if len(currently_infected_nodes) == 0:
-                break
-            cascade.append(currently_infected_nodes)
-            logging.debug('Current Cascades {}'.format(cascade))
-            t += 1
-        cascades.append([node for current_infection in cascade for node in current_infection])
-    return cascades
+    infections = {0: {root}}
+    cascade = [root]
+    current_time_step = 1
+    while len(cascade) < h:
+        previously_infected_nodes = infections[current_time_step - 1]
+        infections[current_time_step] = set()
+        for node in previously_infected_nodes:
+            if node in network:
+                for nbr in network[node]:
+                    if nbr not in infections[current_time_step]:
+                        w = network[node][nbr]['weight']
+                        if np.random.random() < w:
+                            infections[current_time_step].add(nbr)
+                            cascade.append(nbr)
+                            if len(cascade) >= h:
+                                return cascade
+        current_time_step += 1
+    return cascade
 
 
-def mineral_cascades(network, r, h):
+def simulate_diffusion_events(network, r, h):
     """
     Samples cascades using a number of simulation of truncated diffusion processes from
     each node
@@ -167,16 +138,14 @@ def mineral_cascades(network, r, h):
     :return: 
     """
     logging.info('Simulating diffusion ...')
-    nodes = network.keys()
+    nodes = list(network.nodes())
     cascades = []
-    progress = 0
-    display_step = int(len(nodes) * .01)
-    for root in nodes:
-        progress += 1
-        if progress % display_step == 0:
-            sys.stdout.write('\r{}/{} nodes have been processed'.format(progress, len(nodes)))
-            sys.stdout.flush()
-        cascades += simulate_diffusion(network, root, r, h)
+    for i in range(r):
+        print('Progress: {}/{}'.format(i + 1, r))
+        np.random.shuffle(nodes)
+        for root in nodes:
+            cascade = simulate_diffusion(network, root, h)
+            cascades.append(cascade)
 
     return cascades
 
@@ -187,18 +156,29 @@ def embed(walks, d, window, epoch, workers=8):
 
 
 def display_args(args):
-    logging.info('Input arguments')
+    print('INFO: Input arguments')
     for arg in vars(args):
-        logging.info('{}: {}'.format(arg, getattr(args, arg)))
+        print('INFO: {}: {}'.format(arg, getattr(args, arg)))
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Runs the python implementation of mineral")
     parser.add_argument('--net-file', default='../data/network.txt', help='Path to network file')
+    parser.add_argument('--net-format', default='edgelist',
+                        help='Graph file format, possible values are (edgelist, adjlist).'
+                             'Default is edgelist')
     parser.add_argument('--att-file', default='../data/attributes.txt', help='Path to attributes file')
-    parser.add_argument('--cas-file', default='../data/cascades.txt', help='Path to existing cascade file')
+    parser.add_argument('--att-format', default='adjlist',
+                        help='Similar to graph file format. Default is adjlist')
+    parser.add_argument('--cas-file', default='../data/cascades.txt',
+                        help='Path to observed cascades file')
     parser.add_argument('--sim-file', default='../data/simulated_cascades.txt', help='Path to simulated cascade file')
     parser.add_argument('--emb-file', default='../data/network.emb', help='Path to the embedding output file')
+    parser.add_argument('--sample', dest='sample', action='store_true',
+                        help="An indicator whether to sample from observed cascades."
+                             "Valid when observed cascades are provided. "
+                             "Default is False")
+    parser.set_defaults(sample=False)
     parser.add_argument('--directed', dest='directed', action='store_true')
     parser.add_argument('--undirected', dest='directed', action='store_false')
     parser.set_defaults(directed=False)
@@ -215,38 +195,40 @@ def parse_args():
     return parser.parse_args()
 
 
-def save_embedding(path, model):
-    model.wv.save_word2vec_format(path)
-
-
-def save_cascades(path, cascades):
-    with open(path, 'w') as f:
-        for c in cascades:
-            f.write('{}\n'.format(' '.join(str(n) for n in c)))
-
-
 def main():
     args = parse_args()
     display_args(args)
-    network = read_network(args.net_file, directed=args.directed, weighted=args.weighted)
-    cascades = mineral_cascades(network, r=args.r, h=args.h)
+    network = read_network(args.net_file, directed=args.directed)
+    num_nodes = network.number_of_nodes()
+    feature_matrix = build_feature_matrix(
+        args.att_file, input_format=args.att_format, num_nodes=num_nodes)
+    weighted_network = compute_similarity(
+        network=network, feature_matrix=feature_matrix)
+    cascades = simulate_diffusion_events(weighted_network, r=args.r, h=args.h)
     if args.sim_file != '':
         save_cascades(args.sim_file, cascades)
 
     cascades = [list(map(str, cascade)) for cascade in cascades]
     if len(cascades) > 0:
         if args.cas_file != '':
-            logging.info('With cascades')
-            existing_cascades = read_cascades(args.cas_file, args.min_threshold, args.max_threshold)
-            existing_cascades = [map(str, cascade) for cascade in existing_cascades]
-            cascades += existing_cascades
-            model = embed(cascades, d=args.dim, window=args.window, epoch=args.iter)
+            print('INFO: Observed cascades are provided')
+            observed_cascades = read_cascades(args.cas_file, args.min_threshold, args.max_threshold)
+            if args.sample:
+                cascade_graph = build_cascade_graph(
+                    cascades=observed_cascades, num_nodes=num_nodes)
+                sampled_cascades = sample_cascades(
+                    cascade_graph=cascade_graph, num_nodes=num_nodes, r=args.r, h=args.h)
+                cascades += sampled_cascades
+            else:
+                cascades += observed_cascades
         else:
-            logging.info('Without cascades')
-            model = embed(cascades, d=args.dim, window=args.window, epoch=args.iter)
+            print('INFO:Without cascades')
+
+        cascades = [map(str, cascade) for cascade in cascades]
+        model = embed(cascades, d=args.dim, window=args.window, epoch=args.iter)
         save_embedding(args.emb_file, model)
     else:
-        logging.error('The length of the cascades is zero, nothing to train on')
+        raise ValueError('The length of the cascades is zero, nothing to train on')
 
 
 if __name__ == '__main__':
