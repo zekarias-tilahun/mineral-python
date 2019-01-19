@@ -3,7 +3,7 @@ Implementation of the Mineral algorithm as described in the paper,
 [Mineral: Multi-modal Network Representation Learning](https://zekarias-tilahun.github.io/zack/publications/mineral-mod2018.pdf).
 This version includes a minor change for cascade sampling, 
 if observed cascades are provided.
-To enable this functionality just activate the --sample flag.
+To enable this functionality just activate the `--sample` flag.
 Without this flag, it is exactly the first version Mineral 0.0.1.
 ### Requirements!
   - gensim 0.13+
