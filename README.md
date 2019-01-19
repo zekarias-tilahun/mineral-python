@@ -6,7 +6,7 @@ if observed cascades are provided.
 To enable this functionality just activate the `--sample` flag.
 Without this flag, it is exactly the first version Mineral 0.0.1.
 ### Requirements!
-  - gensim 0.13+
+  - gensim 0.13
   - Numpy 1.14+
   - networkx  2.0+
   
@@ -124,6 +124,8 @@ Default is `adjlist`
 `--r:` The number of cascades to simulate from each node. Default is 10
 
 `--h:` The max length of each simulated cascade. Default is 80
+
+`--workers:` The number of parallel jobs. Default is 8
 
 Citing
 ------
