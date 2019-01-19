@@ -196,6 +196,8 @@ def parse_args():
     parser.add_argument('--iter', type=int, default=20, help='Number of epochs')
     parser.add_argument('--r', type=int, default=10, help='Number of diffusion processes to simulate from a node')
     parser.add_argument('--h', type=int, default=80, help='Maximum number of nodes to infect in a single simulation')
+    parser.add_argument('--workers', type=int, default=8,
+                        help='Number of parallel jobs. Default is 8')
     return parser.parse_args()
 
 
@@ -215,7 +217,6 @@ def main():
 
     if len(cascades) > 0:
         if args.cas_file != '':
-            print('INFO: Observed cascades are provided')
             observed_cascades = read_cascades(args.cas_file, args.min_threshold, args.max_threshold)
             if args.sample:
                 cascade_graph = build_cascade_graph(
@@ -225,11 +226,12 @@ def main():
                 cascades += sampled_cascades
             else:
                 cascades += observed_cascades
+            print('INFO: Learning with observed cascades')
         else:
-            print('INFO:Without cascades')
+            print('INFO:Learning without observed cascades')
 
         cascades = [list(map(str, cascade)) for cascade in cascades]
-        model = embed(cascades, d=args.dim, window=args.window, epoch=args.iter)
+        model = embed(cascades, d=args.dim, window=args.window, epoch=args.iter, workers=args.workers)
         save_embedding(args.emb_file, model)
     else:
         raise ValueError('The length of the cascades is zero, nothing to train on')
