@@ -7,7 +7,7 @@ Implementation of the Mineral algorithm as described in the paper,
 ## Usage
 #### Example usage
 ```sh
-$ python src/mineral.py --net-file ../data/network.txt --emb-file ../data/network.txt
+$ python src/mineral.py --net-file ../data/network.txt --emb-file ../data/cascades.txt
 ```
 
 #### Input format
