@@ -10,37 +10,47 @@ Implementation of the Mineral algorithm as described in the paper,
 $ python src/mineral.py --net-file ../data/network.txt --emb-file ../data/cascades.txt
 ```
 
-#### Input format
-`network file`
+#### Input Files
+##### Graph inputs
+`network file` and `attribute file`
+
+Two kinds of formats are supported, which are `adjlist` and `edgelist`
+
+>`adjlist`
 
 ```text
 Format
-source target weight
+node (list of neighbors | list of attributes)
 
 Example
-0 1 0.2
-0 2 0.4
-1 2 0.7
+0 1 2 3
+1 0 3
+2 0
+3 0 1
 ```
 
-`attribute file`
+`edgelist`
 
 ```text
 Format
-node [list-of-attributes]
+node (neighbor | attribute)
 
 Example
-0 a k f
-1 b a k j d
-2 j f d e
+0 1
+0 2
+0 3
+1 0
+1 3
+2 0
+3 0
+3 1
 ```
 
 `cascade-file`
 
 ```text
 Format:
-node_1 node_2 node_3 ... node_m
-node_1 node_2 node_3 ... node_n
+(list of nodes)
 
 Example:
 2 0 1
@@ -53,7 +63,15 @@ Example:
 `--net-file:`
 Path to a network file. Default is ../data/network.txt
 
+`--net-format:`
+Network file format. Possible values are `edgelist` and `adjlist`.
+Default is `edgelist`
+
 `--att-file` A path to nodes attribute file. Default is ../data/attributes.txt
+
+`--att-format:` Attribute file format. Possible values are 
+`edgelist`, `adjlist`, and `matrix`. Default is `adjlist`
+
 
 `--cas-file:` A path to cascades file. Default is ../data/cascades.txt
 
