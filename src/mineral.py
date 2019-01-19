@@ -125,6 +125,8 @@ def simulate_diffusion(network, root, h):
                             cascade.append(nbr)
                             if len(cascade) >= h:
                                 return cascade
+        if len(infections[current_time_step]) == 0:
+            break
         current_time_step += 1
     return cascade
 
@@ -143,7 +145,7 @@ def simulate_diffusion_events(network, r, h):
     nodes = list(network.nodes())
     cascades = []
     for i in range(r):
-        print('Progress: {}/{}'.format(i + 1, r))
+        print('PROGRESS: {}/{}'.format(i + 1, r))
         np.random.shuffle(nodes)
         for root in nodes:
             cascade = simulate_diffusion(network, root, h)
