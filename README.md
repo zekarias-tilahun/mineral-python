@@ -18,7 +18,8 @@ $ python src/mineral.py --net-file ../data/network.txt --emb-file ../data/cascad
 
 #### Input Files
 ##### Graph inputs
-`net-file` and `att-file`
+Inputs related to the graph can be provided using 
+`--net-file` and `--att-file`
 
 Four kinds of formats are supported for both files, 
 which are `adjlist`, `edgelist`, `mattxt`, and `matnpy`
