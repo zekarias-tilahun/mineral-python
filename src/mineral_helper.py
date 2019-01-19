@@ -2,7 +2,7 @@ import networkx as nx
 import numpy as np
 
 
-def read_network(path, directed=False, input_format='edgelist', sep=' '):
+def read_network(path, directed=False, input_format='edgelist', sep='\t'):
     """
     Reads a graph from a path
     :param path: The path
@@ -16,18 +16,12 @@ def read_network(path, directed=False, input_format='edgelist', sep=' '):
         path, input_format))
     create_using = nx.DiGraph() if directed else nx.Graph()
     if input_format == 'edgelist':
-        network = nx.read_edgelist(
-            path, delimiter=sep,
-            create_using=create_using)
+        network = nx.read_edgelist(path, create_using=create_using)
     elif input_format == 'adjlist':
-        network = nx.read_adjlist(
-            path, delimiter=sep,
-            create_using=create_using
-        )
+        network = nx.read_adjlist(path, create_using=create_using)
     elif input_format == 'mattxt':
         adj_mat = np.loadtxt(path)
-        network = nx.from_numpy_array(
-            A=adj_mat, create_using=create_using)
+        network = nx.from_numpy_array(A=adj_mat, create_using=create_using)
     else:
         adj_mat = np.load(path)
         network = nx.from_numpy_array(
