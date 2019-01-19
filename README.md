@@ -53,10 +53,10 @@ Example
 Format
 A matrix W of n x m dimensions
 
-n is the number of nodes
+n is the number of nodes 
 m is equal to n if W is an adjacency matrix of the graph
-or m is the number of attributes if W is an attribute matrix.
-It can be a *.txt text or *.npy numpy binary file.
+m is the number of attributes if W is an attribute matrix.
+W can be a *.txt text or *.npy numpy binary file.
 ```
 
 
