@@ -27,11 +27,11 @@ source target weight
 `cascade-file`
 
 ```text
->Format
+Format:
 node_1 node_2 node_3 ... node_m
 node_1 node_2 node_3 ... node_n
 
->Example
+Example:
 2 0 1
 1 0
 0 2 1
