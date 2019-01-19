@@ -94,7 +94,7 @@ Default is `edgelist`
 
 `--att-format:` Attribute file format. Possible values are 
 `edgelist`, `adjlist`, `mattxt`, and `matnpy`. 
-Default is `adjlist`
+Default is `mattxt`
 
 
 `--cas-file:` A path to cascades file. Default is ../data/cascades.txt

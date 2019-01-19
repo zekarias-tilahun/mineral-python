@@ -168,17 +168,17 @@ def display_args(args):
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Runs the python implementation of mineral")
-    parser.add_argument('--net-file', default='../data/network.txt', help='Path to network file')
+    parser.add_argument('--net-file', default='../data/cora/network.txt', help='Path to network file')
     parser.add_argument('--net-format', default='edgelist',
                         help='Graph file format, possible values are (edgelist, adjlist).'
                              'Default is edgelist')
-    parser.add_argument('--att-file', default='', help='Path to attributes file')
-    parser.add_argument('--att-format', default='adjlist',
-                        help='Similar to graph file format. Default is adjlist')
+    parser.add_argument('--att-file', default='../data/cora/attributes.txt', help='Path to attributes file')
+    parser.add_argument('--att-format', default='mattxt',
+                        help='Similar to graph file format. Default is mattxt')
     parser.add_argument('--cas-file', default='',
                         help='Path to observed cascades file')
-    parser.add_argument('--sim-file', default='../data/simulated_cascades.txt', help='Path to simulated cascade file')
-    parser.add_argument('--emb-file', default='../data/network.emb', help='Path to the embedding output file')
+    parser.add_argument('--sim-file', default='../data/cora/simulated_cascades.txt', help='Path to simulated cascade file')
+    parser.add_argument('--emb-file', default='../data/cora/network.emb', help='Path to the embedding output file')
     parser.add_argument('--sample', dest='sample', action='store_true',
                         help="An indicator whether to sample from observed cascades."
                              "Valid when observed cascades are provided. "
