@@ -204,15 +204,15 @@ def main():
     display_args(args)
     network = read_network(args.net_file, directed=args.directed)
     num_nodes = network.number_of_nodes()
-    feature_matrix = build_feature_matrix(
-        args.att_file, input_format=args.att_format, num_nodes=num_nodes)
-    weighted_network = compute_similarity(
-        network=network, feature_matrix=feature_matrix)
-    cascades = simulate_diffusion_events(weighted_network, r=args.r, h=args.h)
+    if args.att_file.strip() != '':
+        feature_matrix = build_feature_matrix(
+            args.att_file, input_format=args.att_format, num_nodes=num_nodes)
+        network = compute_similarity(
+            network=network, feature_matrix=feature_matrix)
+    cascades = simulate_diffusion_events(network, r=args.r, h=args.h)
     if args.sim_file != '':
         save_cascades(args.sim_file, cascades)
 
-    cascades = [list(map(str, cascade)) for cascade in cascades]
     if len(cascades) > 0:
         if args.cas_file != '':
             print('INFO: Observed cascades are provided')
@@ -228,7 +228,7 @@ def main():
         else:
             print('INFO:Without cascades')
 
-        cascades = [map(str, cascade) for cascade in cascades]
+        cascades = [list(map(str, cascade)) for cascade in cascades]
         model = embed(cascades, d=args.dim, window=args.window, epoch=args.iter)
         save_embedding(args.emb_file, model)
     else:
