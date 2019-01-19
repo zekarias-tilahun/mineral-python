@@ -12,6 +12,8 @@ def read_network(path, directed=False, input_format='edgelist', sep=' '):
     :param sep:
     :return:
     """
+    print('INFO: Reading network file from {} stored as {} format'.format(
+        path, input_format))
     create_using = nx.DiGraph() if directed else nx.Graph()
     if input_format == 'edgelist':
         network = nx.read_edgelist(
@@ -44,6 +46,8 @@ def build_feature_matrix(path, num_nodes, input_format='adjlist'):
             files use adjlist or edgelist
     :return: Numpy array or Scipy sparse matrix
     """
+    print('INFO: Reading attribute file from {} stored as {} format'.format(
+        path, input_format))
     if input_format == 'adjlist':
         reader = nx.read_adjlist
     elif input_format == 'edgelist':
@@ -70,7 +74,7 @@ def read_cascades(cas_file, min_threshold, max_threshold):
     :param max_threshold:
     :return:
     """
-    logging.info('Reading existing cascades from {} ...'.format(cas_file))
+    print('INFO: Reading existing cascades from {} ...'.format(cas_file))
     cascades = []
     with open(cas_file) as f:
         for line in f:
@@ -91,7 +95,7 @@ def read_embedding(path, existing_emb=None, sep=None):
     :param sep:
     :return:
     """
-    logging.info('{}:Reading embedding from {}'.format(dt.datetime.now(), path))
+    print('INFO: Reading embedding from {}'.format(path))
     nodes_embedding = {}
     with open(path) as f:
         for line in f:
