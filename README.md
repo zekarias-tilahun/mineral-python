@@ -18,7 +18,7 @@ $ python src/mineral.py --net-file ../data/network.txt --emb-file ../data/cascad
 
 #### Input Files
 ##### Graph inputs
-`network file` and `attribute file`
+`net-file` and `att-file`
 
 Four kinds of formats are supported for both files, 
 which are `adjlist`, `edgelist`, `mattxt`, and `matnpy`
@@ -66,7 +66,7 @@ W can be a *.txt text or *.npy numpy binary file.
 ```
 
 
-`cascade-file`
+`cas-file`
 
 ```text
 Format:
