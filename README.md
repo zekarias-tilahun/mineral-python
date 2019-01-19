@@ -13,6 +13,7 @@ Without this flag, it is exactly the first version Mineral 0.0.1.
 ## Usage
 #### Example usage
 ```sh
+$ cd src
 $ python mineral.py
 ```
 
