@@ -8,6 +8,7 @@ To enable this functionality just activate the --sample flag.
   - gensim 0.13+
   - Numpy 1.14+
   - networkx  2.0+
+  
 ## Usage
 #### Example usage
 ```sh
