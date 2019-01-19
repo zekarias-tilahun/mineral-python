@@ -137,6 +137,7 @@ def build_cascade_graph(cascades, num_nodes):
 
 
 def save_embedding(path, model):
+    print('INFO: Saving learned embeddings to {} using word2vec format'.format(path))
     model.wv.save_word2vec_format(path)
 
 

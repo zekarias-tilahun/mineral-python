@@ -194,8 +194,11 @@ def parse_args():
     parser.add_argument('--dim', type=int, default=128, help='Size of the representation')
     parser.add_argument('--window', type=int, default=10, help='Window size')
     parser.add_argument('--iter', type=int, default=20, help='Number of epochs')
-    parser.add_argument('--r', type=int, default=10, help='Number of diffusion processes to simulate from a node')
-    parser.add_argument('--h', type=int, default=80, help='Maximum number of nodes to infect in a single simulation')
+    parser.add_argument('--r', type=int, default=10,
+                        help='Number of diffusion processes to simulate from a node')
+    parser.add_argument('--h', type=int, default=60,
+                        help='Maximum number of nodes to infect in a single simulation.'
+                             'Default is 60')
     parser.add_argument('--workers', type=int, default=8,
                         help='Number of parallel jobs. Default is 8')
     return parser.parse_args()

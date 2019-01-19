@@ -123,7 +123,8 @@ Default is `adjlist`
 
 `--r:` The number of cascades to simulate from each node. Default is 10
 
-`--h:` The max length of each simulated cascade. Default is 80
+`--h:` The maximum number of nodes to infect in a single simulation 
+(length of each simulated cascade). Default is 60.
 
 `--workers:` The number of parallel jobs. Default is 8
 
