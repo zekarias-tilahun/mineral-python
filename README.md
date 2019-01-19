@@ -82,3 +82,18 @@ Path to a network file. Default is ../data/network.txt
 `--r:` The number of cascades to simulate from each node. Default is 10
 
 `--h:` The max length of each simulated cascade. Default is 80
+
+Citing
+------
+
+If you find Mineral relevant to your research, we kindly ask you to cite the paper:
+@inproceedings{MOD17,
+  booktitle="Proc. of the 3rd International Conference on Machine Learning, Optimization and Big Data",
+	series = "MOD'17",
+	author = {Kefato, Zekarias T. and Sheikh, Nasrullah and Montresor, Alberto},
+	title = "Mineral: Multi-modal Network Representation Learning",
+	month = sep,
+	year = 2017,
+	type = {CONFERENCE},	
+	publisher = {Springer},
+}
