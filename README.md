@@ -15,7 +15,7 @@ $ python src/mineral.py --net-file ../data/network.txt --emb-file ../data/cascad
 `network file` and `attribute file`
 
 Four kinds of formats are supported for both files, 
-which are `adjlist`, `edgelist`, `mat-txt`, and `mat-npy`
+which are `adjlist`, `edgelist`, `mattxt`, and `matnpy`
 
 >`adjlist`
 
