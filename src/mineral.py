@@ -71,6 +71,7 @@ def compute_similarity(network, feature_matrix):
     edges = network.edges()
     adj_mat = nx.to_scipy_sparse_matrix(network, sorted(network.nodes()))
     sources, targets = list(zip(*edges))
+    sources, targets = list(sources), list(targets)
 
     '''
         Computing common attributes. The matrix common_attributes
