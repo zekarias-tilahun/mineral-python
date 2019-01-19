@@ -68,7 +68,8 @@ def compute_similarity(network, feature_matrix):
             feature_matrix[i, j] = 1 if node i has attribute j otherwise 0.
     :return:
     """
-    print('INFO: Computing similarity between incident nodes each edge')
+    print('INFO: Computing similarity between incident nodes of '
+          'each edge in the graph')
     edges = network.edges()
     adj_mat = nx.to_scipy_sparse_matrix(network, sorted(network.nodes()))
     sources, targets = list(zip(*edges))
@@ -214,6 +215,7 @@ def main():
             args.att_file, input_format=args.att_format, num_nodes=num_nodes)
         network = compute_similarity(
             network=network, feature_matrix=feature_matrix)
+        print('INFO: Attribute information is used to build a weighted graph')
     cascades = simulate_diffusion_events(network, r=args.r, h=args.h)
     if args.sim_file != '':
         save_cascades(args.sim_file, cascades)
