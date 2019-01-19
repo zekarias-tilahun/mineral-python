@@ -65,8 +65,9 @@ m is the number of attributes if W is an attribute matrix.
 W can be a *.txt text or *.npy numpy binary file.
 ```
 
-
-`cas-file`
+#### Cascade inputs
+The final optional inputs are cascades, provided using
+`--cas-file` 
 
 ```text
 Format:
