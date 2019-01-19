@@ -2,34 +2,35 @@ import networkx as nx
 import numpy as np
 
 
-def add_edge(g, src, dst, w, directed=True):
+def read_network(path, directed=False, input_format='edgelist', sep=' '):
     """
-    Adds a directed/undirected edge between two nodes of a given graph
-    :param g: the graph
-    :param src: first node
-    :param dst: second node
-    :param w: The weight of the edge
-    :param directed: Whether the edge is directed or not
+    Reads a graph from a path
+    :param path: The path
+    :param directed: An flag to indicate if the graph is directed or not
+    :param input_format: The format of the file, possible values are
+                         (edgelist - Default | adjlist | mattxt | matnpy)
+    :param sep:
     :return:
     """
-    if src not in g:
-        g[src] = {dst: w}
-    else:
-        g[src][dst] = w
-    if not directed:
-        add_edge(g, dst, src, True)
-
-
-def read_network(path, directed=False, input_format='edgelist', sep=' '):
+    create_using = nx.DiGraph() if directed else nx.Graph()
     if input_format == 'edgelist':
         network = nx.read_edgelist(
             path, delimiter=sep,
-            create_using=nx.DiGraph() if directed else nx.Graph())
-    else:
+            create_using=create_using)
+    elif input_format == 'adjlist':
         network = nx.read_adjlist(
             path, delimiter=sep,
-            create_using=nx.DiGraph() if directed else nx.Graph()
+            create_using=create_using
         )
+    elif input_format == 'mattxt':
+        adj_mat = np.loadtxt(path, delimiter=' ')
+        network = nx.from_numpy_array(
+            A=adj_mat, create_using=create_using)
+    else:
+        adj_mat = np.load(path)
+        network = nx.from_numpy_array(
+            A=adj_mat, create_using=create_using)
+
     return network
 
 
@@ -39,17 +40,21 @@ def build_feature_matrix(path, num_nodes, input_format='adjlist'):
     :param path: A path to nodes attribute file
     :param num_nodes: The number of nodes
     :param input_format: The file format, possible values are
-            (adjlist | edgelist | matrix), for large file use adjlist or edgelist
+            (adjlist - Default | edgelist | mattxt | matnpy), for large
+            files use adjlist or edgelist
     :return: Numpy array or Scipy sparse matrix
     """
     if input_format == 'adjlist':
         reader = nx.read_adjlist
     elif input_format == 'edgelist':
         reader = nx.read_edgelist
-    else:
+    elif input_format == 'mattxt':
         return np.loadtxt(path, delimiter=' ')
+    else:
+        return np.load(path)
 
-    attributes = reader(path, delimiter=' ', create_using=nx.DiGraph(), nodetype=int)
+    attributes = reader(
+        path, delimiter=' ', create_using=nx.DiGraph(), nodetype=int)
     attribute_mat = nx.to_scipy_sparse_matrix(
         attributes, nodelist=sorted(attributes.nodes()))
     feature_mat = attribute_mat[:num_nodes, :num_nodes]
