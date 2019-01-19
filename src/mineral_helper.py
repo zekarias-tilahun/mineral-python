@@ -23,7 +23,7 @@ def read_network(path, directed=False, input_format='edgelist', sep=' '):
             create_using=create_using
         )
     elif input_format == 'mattxt':
-        adj_mat = np.loadtxt(path, delimiter=' ')
+        adj_mat = np.loadtxt(path)
         network = nx.from_numpy_array(
             A=adj_mat, create_using=create_using)
     else:
@@ -49,7 +49,7 @@ def build_feature_matrix(path, num_nodes, input_format='adjlist'):
     elif input_format == 'edgelist':
         reader = nx.read_edgelist
     elif input_format == 'mattxt':
-        return np.loadtxt(path, delimiter=' ')
+        return np.loadtxt(path)
     else:
         return np.load(path)
 
