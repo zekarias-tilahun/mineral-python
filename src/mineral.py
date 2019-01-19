@@ -96,7 +96,7 @@ def compute_similarity(network, feature_matrix):
 
     # Construct a weighted graph based on the similarities
     adj_mat[sources, targets] = similarities
-    norm_adj_mat = normalize(adj_mat, norm='l1')
+    norm_adj_mat = normalize(adj_mat, norm='l2')
     return nx.from_scipy_sparse_matrix(norm_adj_mat)
 
 

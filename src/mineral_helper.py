@@ -4,14 +4,13 @@ import networkx as nx
 import numpy as np
 
 
-def read_network(path, directed=False, input_format='edgelist', sep='\t'):
+def read_network(path, directed=False, input_format='edgelist'):
     """
     Reads a graph from a path
     :param path: The path
     :param directed: An flag to indicate if the graph is directed or not
     :param input_format: The format of the file, possible values are
                          (edgelist - Default | adjlist | mattxt | matnpy)
-    :param sep:
     :return:
     """
     print('INFO: Reading network file from {} stored as {} format'.format(
@@ -30,7 +29,7 @@ def read_network(path, directed=False, input_format='edgelist', sep='\t'):
     else:
         adj_mat = csr_matrix(np.load(path))
 
-    norm_adj_mat = normalize(adj_mat, norm='l1')
+    norm_adj_mat = normalize(adj_mat, norm='l2')
     network = nx.from_scipy_sparse_matrix(A=norm_adj_mat, create_using=create_using)
     print('\n\tNumber of nodes: {}\n\tNumber of edges: {}'.format(
         network.number_of_nodes(), network.number_of_edges()))
@@ -90,30 +89,6 @@ def read_cascades(cas_file, min_threshold, max_threshold):
                     cascade.append(int(node))
                 cascades.append(cas)
     return cascades
-
-
-def read_embedding(path, existing_emb=None, sep=None):
-    """
-    Read nodes embedding (representation) from a file
-    :param path:
-    :param existing_emb
-    :param sep:
-    :return:
-    """
-    print('INFO: Reading embedding from {}'.format(path))
-    nodes_embedding = {}
-    with open(path) as f:
-        for line in f:
-            node_embedding = line.strip().split() if sep is None else line.strip().split(sep)
-            if len(node_embedding) > 2:
-                node = int(node_embedding[0])
-                if existing_emb is not None and node in existing_emb:
-                    embedding = np.array([float(num) for num in node_embedding[1:]])
-                    nodes_embedding[node] = embedding
-                elif existing_emb is None:
-                    embedding = np.array([float(num) for num in node_embedding[1:]])
-                    nodes_embedding[node] = embedding
-    return nodes_embedding
 
 
 def build_cascade_graph(cascades, num_nodes):
