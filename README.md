@@ -14,7 +14,8 @@ $ python src/mineral.py --net-file ../data/network.txt --emb-file ../data/cascad
 ##### Graph inputs
 `network file` and `attribute file`
 
-Two kinds of formats are supported, which are `adjlist` and `edgelist`
+Four kinds of formats are supported for both files, 
+which are `adjlist`, `edgelist`, `mat-txt`, and `mat-npy`
 
 >`adjlist`
 
@@ -29,7 +30,7 @@ Example
 3 0 1
 ```
 
-`edgelist`
+>`edgelist`
 
 ```text
 Format
@@ -45,6 +46,19 @@ Example
 3 0
 3 1
 ```
+
+>`mattxt` or `matnpy`
+
+```text
+Format
+A matrix W of n x m dimensions
+
+n is the number of nodes
+m is equal to n if W is an adjacency matrix of the graph
+or m is the number of attributes if W is an attribute matrix.
+It can be a *.txt text or *.npy numpy binary file.
+```
+
 
 `cascade-file`
 
@@ -64,13 +78,15 @@ Example:
 Path to a network file. Default is ../data/network.txt
 
 `--net-format:`
-Network file format. Possible values are `edgelist` and `adjlist`.
+Network file format. Possible values are 
+`edgelist`, `adjlist`, `mattxt`, and `matnpy` .
 Default is `edgelist`
 
 `--att-file` A path to nodes attribute file. Default is ../data/attributes.txt
 
 `--att-format:` Attribute file format. Possible values are 
-`edgelist`, `adjlist`, and `matrix`. Default is `adjlist`
+`edgelist`, `adjlist`, `mattxt`, and `matnpy`. 
+Default is `adjlist`
 
 
 `--cas-file:` A path to cascades file. Default is ../data/cascades.txt
