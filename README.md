@@ -1,4 +1,4 @@
-# Mineral
+# Mineral (0.0.2)
 Implementation of the Mineral algorithm as described in the paper, 
 [Mineral: Multi-modal Network Representation Learning](https://zekarias-tilahun.github.io/zack/publications/mineral-mod2018.pdf).
 ### Requirements!
