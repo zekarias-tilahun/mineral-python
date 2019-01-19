@@ -23,6 +23,18 @@ Example
 1 2 0.7
 ```
 
+`attribute file`
+
+```text
+Format
+node [list-of-attributes]
+
+Example
+0 a k f
+1 b a k j d
+2 j f d e
+```
+
 `cascade-file`
 
 ```text
@@ -35,3 +47,38 @@ Example:
 1 0
 0 2 1
 ```
+
+### Available command line options
+
+`--net-file:`
+Path to a network file. Default is ../data/network.txt
+
+`--att-file` A path to nodes attribute file. Default is ../data/attributes.txt
+
+`--cas-file:` A path to cascades file. Default is ../data/cascades.txt
+
+`--sim-file:` A path to save the simulated cascades. Default is '../data/simulated_cascades.txt'
+
+`--emb-file:` A path to save the embedding files. Default is ../data/network.emb
+
+`--directed:` A flag to indicate the input graph is directed. Default is False
+
+`--undirected:` A flag to indicate the input graph is undirected. Default is True
+
+`--weighted:` A flag to indicate the input graph is weighted. Default is False
+
+`--unweighted:` A flag to indicate the input graph is unweighted. Default is True
+
+`--min-threshold:` A threshold for the min length of observed cascades
+
+`--max-threshold:` A threshold for the max length of observed cascades
+
+`--dim:` An embedding dimension. Default is 128.
+
+`--window:` A window size for the SkipGram model. Default is 10
+
+`--iter:` The number of epochs
+
+`--r:` The number of cascades to simulate from each node
+
+`--h:` The max length of each simulated cascade
