@@ -193,11 +193,11 @@ def display_args(args):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Runs diffusion simulator")
-    parser.add_argument('--net-file', default='./data/network.txt', help='Path to network file')
-    parser.add_argument('--cas-file', default='./data/cascades.txt', help='Path to existing cascade file')
-    parser.add_argument('--sim-file', default='./data/simulated_cascades.txt', help='Path to simulated cascade file')
-    parser.add_argument('--emb-file', default='./data/graph.emb', help='Path to the embedding output file')
+    parser = argparse.ArgumentParser(description="Runs the python implementation of mineral")
+    parser.add_argument('--net-file', default='../data/network.txt', help='Path to network file')
+    parser.add_argument('--cas-file', default='../data/cascades.txt', help='Path to existing cascade file')
+    parser.add_argument('--sim-file', default='../data/simulated_cascades.txt', help='Path to simulated cascade file')
+    parser.add_argument('--emb-file', default='../data/graph.emb', help='Path to the embedding output file')
     parser.add_argument('--directed', dest='directed', action='store_true')
     parser.add_argument('--undirected', dest='directed', action='store_false')
     parser.set_defaults(directed=False)
