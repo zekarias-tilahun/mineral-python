@@ -139,7 +139,7 @@ def simulate_diffusion_events(network, r, h):
     :param h: 
     :return: 
     """
-    logging.info('Simulating diffusion ...')
+    print('INFO: Simulating diffusion ...')
     nodes = list(network.nodes())
     cascades = []
     for i in range(r):
