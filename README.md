@@ -6,7 +6,7 @@ if observed cascades are provided.
 To enable this functionality just activate the `--sample` flag.
 Without this flag, it is exactly the first version Mineral 0.0.1.
 ### Requirements!
-  - gensim 0.13
+  - gensim 3.14
   - Numpy 1.14+
   - networkx  2.0+
   
