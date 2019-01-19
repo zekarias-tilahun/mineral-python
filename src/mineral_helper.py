@@ -32,7 +32,8 @@ def read_network(path, directed=False, input_format='edgelist', sep=' '):
         adj_mat = np.load(path)
         network = nx.from_numpy_array(
             A=adj_mat, create_using=create_using)
-
+    print('\n\tNumber of nodes: {}\n\tNumber of edges: {}'.format(
+        network.number_of_nodes(), network.number_of_edges()))
     return network
 
 
@@ -53,9 +54,13 @@ def build_feature_matrix(path, num_nodes, input_format='adjlist'):
     elif input_format == 'edgelist':
         reader = nx.read_edgelist
     elif input_format == 'mattxt':
-        return np.loadtxt(path)
+        mat = np.loadtxt(path)
+        print('INFO: Number of features: {}'.format(mat.shape[1]))
+        return mat
     else:
-        return np.load(path)
+        mat = np.load(path)
+        print('INFO: Number of features: {}'.format(mat.shape[1]))
+        return mat
 
     attributes = reader(
         path, delimiter=' ', create_using=nx.DiGraph(), nodetype=int)
