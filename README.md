@@ -77,8 +77,8 @@ Path to a network file. Default is ../data/network.txt
 
 `--window:` A window size for the SkipGram model. Default is 10
 
-`--iter:` The number of epochs
+`--iter:` The number of epochs. Default is 20
 
-`--r:` The number of cascades to simulate from each node
+`--r:` The number of cascades to simulate from each node. Default is 10
 
-`--h:` The max length of each simulated cascade
+`--h:` The max length of each simulated cascade. Default is 80
