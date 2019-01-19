@@ -87,9 +87,11 @@ Citing
 ------
 
 If you find Mineral relevant to your research, we kindly ask you to cite the paper:
+
+```
 @inproceedings{MOD17,
-  booktitle="Proc. of the 3rd International Conference on Machine Learning, Optimization and Big Data",
-	series = "MOD'17",
+    booktitle="Proc. of the 3rd International Conference on Machine Learning, Optimization and Big Data",
+    series = "MOD'17",
 	author = {Kefato, Zekarias T. and Sheikh, Nasrullah and Montresor, Alberto},
 	title = "Mineral: Multi-modal Network Representation Learning",
 	month = sep,
@@ -97,3 +99,4 @@ If you find Mineral relevant to your research, we kindly ask you to cite the pap
 	type = {CONFERENCE},	
 	publisher = {Springer},
 }
+```
