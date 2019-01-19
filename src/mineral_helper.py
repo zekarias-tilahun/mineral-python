@@ -16,9 +16,11 @@ def read_network(path, directed=False, input_format='edgelist', sep='\t'):
         path, input_format))
     create_using = nx.DiGraph() if directed else nx.Graph()
     if input_format == 'edgelist':
-        network = nx.read_edgelist(path, create_using=create_using)
+        network = nx.read_edgelist(
+            path, nodetype=int, create_using=create_using)
     elif input_format == 'adjlist':
-        network = nx.read_adjlist(path, create_using=create_using)
+        network = nx.read_adjlist(
+            path, nodetype=int, create_using=create_using)
     elif input_format == 'mattxt':
         adj_mat = np.loadtxt(path)
         network = nx.from_numpy_array(A=adj_mat, create_using=create_using)
@@ -57,7 +59,7 @@ def build_feature_matrix(path, num_nodes, input_format='adjlist'):
         return mat
 
     attributes = reader(
-        path, delimiter=' ', create_using=nx.DiGraph(), nodetype=int)
+        path, create_using=nx.DiGraph(), nodetype=int)
     attribute_mat = nx.to_scipy_sparse_matrix(
         attributes, nodelist=sorted(attributes.nodes()))
     feature_mat = attribute_mat[:num_nodes, :num_nodes]

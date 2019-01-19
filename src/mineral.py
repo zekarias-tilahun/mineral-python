@@ -68,6 +68,7 @@ def compute_similarity(network, feature_matrix):
             feature_matrix[i, j] = 1 if node i has attribute j otherwise 0.
     :return:
     """
+    print('INFO: Computing similarity between incident nodes each edge')
     edges = network.edges()
     adj_mat = nx.to_scipy_sparse_matrix(network, sorted(network.nodes()))
     sources, targets = list(zip(*edges))
